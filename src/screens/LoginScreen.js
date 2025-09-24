@@ -21,7 +21,11 @@ export default function LoginScreen({ navigation }) {
   
   const handleLogin = (userType) => {
     console.log(`Navigating as: ${userType}`);
-    navigation.replace('MainApp');
+    if (userType === 'citizen') {
+      navigation.replace('MainApp', { screen: 'CitizenHome' });
+    } else {
+      navigation.replace('MainApp', { screen: 'AshaHome' });
+    }
   };
 
   return (

@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Alert, Image, TouchableOpacity, SafeAreaView } from 'react-native';
 import { Button, Icon } from 'react-native-elements';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS } from '../styles/colors';
+import { globalStyles } from '../styles/globalStyles';
 
 export default function CameraScreen({ navigation }) {
   const [image, setImage] = useState(null);
 
   const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
+      aspect: [1, 1], // Square aspect ratio for a focused view
+      quality: 0.8,
     });
 
     if (!result.canceled) {
@@ -24,9 +24,7 @@ export default function CameraScreen({ navigation }) {
   const analyzeImage = () => {
     if (image) {
       console.log('🖼️ Analyzing image:', image);
-      Alert.alert('Analysis Started', 'Your image is being analyzed by our AI. This may take a moment.');
-      // Here you would typically send the image to your analysis service
-      // For now, we'll just navigate back
+      Alert.alert('Analysis Started', 'Your image is being analyzed. This may take a moment.');
       navigation.goBack();
     } else {
       Alert.alert('No Image Selected', 'Please select an image to analyze.');
@@ -34,124 +32,75 @@ export default function CameraScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Upload Skin Image</Text>
-      <Text style={styles.subHeader}>Select a clear image from your gallery for the most accurate analysis.</Text>
+    <SafeAreaView style={globalStyles.container}>
+      <View style={styles.content}>
+        <Text style={globalStyles.title}>Upload for Analysis</Text>
+        <Text style={globalStyles.subtitle}>Select a clear, well-lit image of the skin area.</Text>
 
-      <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
-        {image ? (
-          <Image source={{ uri: image }} style={styles.image} />
-        ) : (
-          <View style={styles.placeholder}>
-            <Icon name="photo" size={50} color={COLORS.primary} />
-            <Text style={styles.placeholderText}>Tap to select an image</Text>
-          </View>
-        )}
-      </TouchableOpacity>
+        <TouchableOpacity onPress={pickImage} style={[globalStyles.card, styles.imagePicker]}>
+          {image ? (
+            <Image source={{ uri: image }} style={styles.image} />
+          ) : (
+            <View style={styles.placeholder}>
+              <Icon name="upload-cloud" type="feather" size={50} color={COLORS.primary} />
+              <Text style={styles.placeholderText}>Tap to select an image</Text>
+            </View>
+          )}
+        </TouchableOpacity>
 
-      {image && (
+        <Button
+          title="Analyze Skin"
+          onPress={analyzeImage}
+          buttonStyle={globalStyles.buttonPrimary}
+          titleStyle={globalStyles.buttonPrimaryTitle}
+          disabled={!image}
+          disabledStyle={{ backgroundColor: COLORS.border }}
+        />
+        
+        {image && (
          <Button
-            title="🔄 Choose a different image"
+            title="Choose a different image"
             type="clear"
             onPress={pickImage}
             titleStyle={styles.changeImageText}
           />
-      )}
-
-      <Button
-        title="🔍 Analyze Skin"
-        onPress={analyzeImage}
-        buttonStyle={styles.analyzeButton}
-        titleStyle={styles.analyzeButtonText}
-        disabled={!image}
-      />
-       <Button
-        title="Cancel"
-        type="outline"
-        onPress={() => navigation.goBack()}
-        buttonStyle={styles.cancelButton}
-        titleStyle={styles.cancelButtonText}
-      />
-    </View>
+        )}
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  content: {
     flex: 1,
-    backgroundColor: COLORS.background,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
-  },
-  header: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: COLORS.primary,
-    marginBottom: 10,
-  },
-  subHeader: {
-    fontSize: 16,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    marginBottom: 30,
-    maxWidth: '90%',
   },
   imagePicker: {
     width: 300,
     height: 300,
-    borderRadius: 20,
-    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
-    borderWidth: 2,
-    borderColor: COLORS.primary,
-    borderStyle: 'dashed',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    padding: 0, // Remove padding to let image fill the card
   },
   image: {
     width: '100%',
     height: '100%',
-    borderRadius: 18,
+    borderRadius: 16, // Match card's border radius
   },
   placeholder: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   placeholderText: {
-    marginTop: 10,
+    marginTop: 15,
     color: COLORS.primary,
     fontSize: 16,
-  },
-  analyzeButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 12,
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    marginVertical: 10,
-    width: 300,
-  },
-  analyzeButtonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600'
   },
   changeImageText: {
-      color: COLORS.primary,
-      fontSize: 16,
-      textDecorationLine: 'underline'
+    color: COLORS.primary,
+    fontSize: 16,
+    marginTop: 10,
   },
-  cancelButton: {
-      width: 300,
-      borderRadius: 12,
-      paddingVertical: 15,
-      borderColor: COLORS.danger,
-  },
-  cancelButtonText: {
-      color: COLORS.danger
-  }
 });
