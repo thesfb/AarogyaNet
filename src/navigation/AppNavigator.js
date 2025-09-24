@@ -2,6 +2,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from '../screens/HomeScreen';
 import CameraScreen from '../screens/CameraScreen';
+import { COLORS } from '../styles/colors'; // Import COLORS
 
 const Stack = createStackNavigator();
 
@@ -11,7 +12,7 @@ export default function AppNavigator() {
       initialRouteName="Home"
       screenOptions={{
         headerStyle: {
-          backgroundColor: '#007AFF',
+          backgroundColor: COLORS.primary, // Use color from your styles
         },
         headerTintColor: '#fff',
         headerTitleStyle: {
@@ -22,12 +23,12 @@ export default function AppNavigator() {
       <Stack.Screen 
         name="Home" 
         component={HomeScreen}
-        options={{ title: 'AarogyaNet' }}
+        options={{ title: 'AarogyaNet Dashboard' }} // Changed title
       />
       <Stack.Screen 
         name="Camera" 
         component={CameraScreen}
-        options={{ title: '📸 Skin Analysis' }}
+        options={{ title: 'Upload for Analysis' }} // Changed title
       />
     </Stack.Navigator>
   );
