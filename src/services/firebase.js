@@ -3,14 +3,14 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
-// Your Firebase config (get from Firebase Console)
+// PASTE YOUR FIREBASE CONFIGURATION HERE
 const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "your-app-id"
+  apiKey: "AIzaSyAlF6L1h1NSvMXSxW_LwK16yx-vxkDQTR4",
+  authDomain: "aarogya-net.firebaseapp.com",
+  projectId: "aarogya-net",
+  storageBucket: "aarogya-net.firebasestorage.app",
+  messagingSenderId: "100755619814",
+  appId: "1:100755619814:web:b057bd386d7764728ea027"
 };
 
 // Initialize Firebase

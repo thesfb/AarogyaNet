@@ -1,22 +1,33 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { View, ActivityIndicator } from 'react-native';
 
-import LoginScreen from './src/screens/LoginScreen';
+import { AuthProvider, AuthContext } from './src/navigation/AuthProvider';
+import AuthNavigator from './src/navigation/AuthNavigator';
 import AppNavigator from './src/navigation/AppNavigator';
 
-const Stack = createStackNavigator();
+const RootNavigator = () => {
+  const { user, isLoading } = useContext(AuthContext);
 
-export default function App() {
-  // In a real app, you'd have a state here to check if the user is logged in
-  // For now, we will create a simple navigator that starts with the Login screen.
-  
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="MainApp" component={AppNavigator} />
-      </Stack.Navigator>
+      {user ? <AppNavigator /> : <AuthNavigator />}
     </NavigationContainer>
+  );
+};
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <RootNavigator />
+    </AuthProvider>
   );
 }
