@@ -1,15 +1,28 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, Image, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+  ActivityIndicator,
+  TextInput
+} from 'react-native';
 import { Button, Icon } from 'react-native-elements';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS } from '../styles/colors';
 import { globalStyles } from '../styles/globalStyles';
 
-// IMPORTANT: Replace this with your computer's local IP address
-const API_URL = 'https://unravaged-kristan-unconventionally.ngrok-free.dev/analyze/skin';
+// --- IMPORTANT ---
+// Replace this with your ngrok URL or your computer's local IP address.
+const API_BASE_URL = 'https://unravaged-kristan-unconventionally.ngrok-free.dev'; 
+const API_URL = `${API_BASE_URL}/analyze/skin`;
 
 export default function CameraScreen({ navigation }) {
   const [image, setImage] = useState(null);
+  const [pincode, setPincode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
 
@@ -28,8 +41,8 @@ export default function CameraScreen({ navigation }) {
   };
 
   const analyzeImage = async () => {
-    if (!image) {
-      Alert.alert('No Image Selected', 'Please select an image to analyze.');
+    if (!image || !pincode || pincode.length !== 6) {
+      Alert.alert('Missing Information', 'Please select an image and enter a valid 6-digit pincode.');
       return;
     }
 
@@ -42,6 +55,7 @@ export default function CameraScreen({ navigation }) {
       name: 'skin_image.jpg',
       type: 'image/jpeg',
     });
+    formData.append('pincode', pincode);
 
     try {
       const response = await fetch(API_URL, {
@@ -55,7 +69,7 @@ export default function CameraScreen({ navigation }) {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.detail || 'Something went wrong');
+        throw new Error(result.detail || 'Something went wrong during analysis');
       }
       
       console.log('Analysis Result:', result);
@@ -80,7 +94,6 @@ export default function CameraScreen({ navigation }) {
     }
 
     if (analysisResult) {
-      // Find the prediction with the highest score
       const topPrediction = analysisResult.reduce((prev, current) => 
         (prev.score > current.score) ? prev : current
       );
@@ -93,6 +106,14 @@ export default function CameraScreen({ navigation }) {
           <Text style={styles.resultScore}>
             Confidence: {Math.round(topPrediction.score * 100)}%
           </Text>
+          <Button
+            title="Ask More About This"
+            icon={<Icon name="message-circle" type="feather" color={COLORS.primary} size={18} />}
+            type="outline"
+            buttonStyle={{ marginTop: 20, borderColor: COLORS.primary, borderRadius: 10 }}
+            titleStyle={{ color: COLORS.primary, marginLeft: 5 }}
+            onPress={() => navigation.navigate('Chat', { diagnosis: topPrediction.label })}
+          />
         </View>
       );
     }
@@ -117,6 +138,15 @@ export default function CameraScreen({ navigation }) {
           )}
         </TouchableOpacity>
 
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your 6-digit Pincode"
+          value={pincode}
+          onChangeText={setPincode}
+          keyboardType="number-pad"
+          maxLength={6}
+        />
+        
         {!analysisResult && (
           <Button
             title={isLoading ? 'Analyzing...' : 'Analyze Skin'}
@@ -144,70 +174,17 @@ export default function CameraScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  content: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  imagePicker: {
-    width: 280,
-    height: 280,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 0,
-    marginBottom: 20,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 16,
-  },
-  placeholder: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderText: {
-    marginTop: 15,
-    color: COLORS.primary,
-    fontSize: 16,
-    fontWeight: '600'
-  },
-  changeImageText: {
-    color: COLORS.primary,
-    fontSize: 16,
-    marginTop: 10,
-  },
-  resultContainer: {
-    width: '90%',
-    padding: 20,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  resultTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.secondary,
-    marginBottom: 15,
-  },
-  resultText: {
-    fontSize: 16,
-    color: COLORS.textSecondary,
-    marginTop: 10,
-  },
-  resultLabel: {
-    fontSize: 16,
-    color: COLORS.textSecondary,
-  },
-  resultPrediction: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: COLORS.primary,
-    textAlign: 'center',
-    marginVertical: 5,
-  },
-  resultScore: {
-    fontSize: 16,
-    color: COLORS.textSecondary,
-    marginTop: 5,
-  },
+  content: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  imagePicker: { width: 280, height: 280, justifyContent: 'center', alignItems: 'center', padding: 0, marginBottom: 20 },
+  image: { width: '100%', height: '100%', borderRadius: 16 },
+  placeholder: { justifyContent: 'center', alignItems: 'center' },
+  placeholderText: { marginTop: 15, color: COLORS.primary, fontSize: 16, fontWeight: '600' },
+  input: { backgroundColor: COLORS.surface, paddingVertical: 15, paddingHorizontal: 20, borderRadius: 12, fontSize: 16, borderWidth: 1, borderColor: COLORS.border, width: '90%', textAlign: 'center', marginBottom: 10 },
+  changeImageText: { color: COLORS.primary, fontSize: 16, marginTop: 10 },
+  resultContainer: { width: '90%', padding: 20, alignItems: 'center', marginTop: 20 },
+  resultTitle: { fontSize: 18, fontWeight: 'bold', color: COLORS.secondary, marginBottom: 15 },
+  resultText: { fontSize: 16, color: COLORS.textSecondary, marginTop: 10 },
+  resultLabel: { fontSize: 16, color: COLORS.textSecondary },
+  resultPrediction: { fontSize: 22, fontWeight: 'bold', color: COLORS.primary, textAlign: 'center', marginVertical: 5 },
+  resultScore: { fontSize: 16, color: COLORS.textSecondary, marginTop: 5 },
 });
